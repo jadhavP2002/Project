@@ -1,0 +1,154 @@
+# Book Recomend on Simple Raw Dataset
+
+import numpy as np
+import pandas as pd
+
+numpy - library used for working on arrays and matrices pandas- library used for working on dataset
+
+Books=pd.read_csv('Books.csv')
+User=pd.read_csv('Users.csv')
+Rating=pd.read_csv('Ratings.csv')
+
+Store dataset in object
+
+Books.head()
+
+User.head()
+
+Rating.head()
+
+Printing dataset
+
+print(Books.shape)
+print(User.shape)
+print(Rating.shape)
+
+How many values in dataset
+
+Books.isnull().sum()
+
+
+User.isnull().sum()
+
+Rating.isnull().sum()
+
+How many Null values are there in dataset
+
+Books.duplicated().sum()
+
+User.duplicated().sum()
+
+Rating.duplicated().sum()
+
+How many Duplicated values are in dataset
+
+# Highest average rating top 50 books
+
+minimum 250 ratings on a books
+
+Rating_with_name=Rating.merge(Books,on='ISBN')
+
+Merge Books and Rating datset with respect to ISBN value.
+
+Rating_with_name
+
+rating=Rating_with_name.groupby('Book-Title').count()['Book-Rating'].reset_index()
+num_rating.rename(columns={'Book-Rating':'num_rating'},inplace=True)
+num_rating
+
+Filter GroupBy which how many votes are having on books and replace a column name of book rating to num rating when rating value is true
+
+avg_rating=Rating_with_name.groupby('Book-Title').mean()['Book-Rating'].reset_index()
+avg_rating.rename(columns={'Book-Rating':'avg_rating'},inplace=True)
+avg_rating
+
+Average rating of Books using mean function
+
+popular=num_rating.merge(avg_rating,on='Book-Title')
+popular
+
+Merge num rating and avg rating
+
+popular[popular['num_rating']>=300].sort_values('avg_rating',ascending=False)
+
+Books which have rating greater than 300 and sorting ascending with average rating
+
+Popular=popular[popular['num_rating']>=300].sort_values('avg_rating',ascending=False).head(50)
+Popular
+
+Top 50 Books with respect to num and avg rating
+
+Popular.merge(Books,on='Book-Title').drop_duplicates('Book-Title')
+
+Merge Pupoular with Books with respect to Book-title and also drop duplicate books
+
+Final_Popular=Popular.merge(Books,on='Book-Title').drop_duplicates('Book-Title')[['Book-Title','Book-Author','num_rating','avg_rating']]
+Final_Popular
+
+Merge popular are store in final popular having columns book title , book author, num rating and avg rating
+
+x = Rating_with_name.groupby('User-ID').count()['Book-Rating']>300
+knowledge_user = x[x].index
+
+Group by User id and book rating in rating with name which is grater than 300 and store index in knowledge user
+
+Filter = Rating_with_name[Rating_with_name['User-ID'].isin(knowledge_user)]
+
+Filter
+
+Filter the rating with name of user id  is in knowledge user
+
+y = Filter.groupby('Book-Title').count()['Book-Rating']>50
+Famous = y[y].index
+
+Filter[Filter['Book-Title'].isin(Famous)]
+
+
+
+Filter group by book title and book rating where book title is in famous
+
+Final = Filter[Filter['Book-Title'].isin(Famous)]
+
+Final.drop_duplicates()
+
+Dropping duplicates
+
+pt = Final.pivot_table(index='Book-Title',columns='User-ID',values='Book-Rating')
+
+pt.fillna(0,inplace=True)
+
+pt
+
+pivot =function produces pivot table based on 3 columns of the dataframe like index , columns, value
+fillna= method for filling null values or holes in reindexed series
+
+from sklearn.metrics.pairwise import cosine_similarity
+
+Score = cosine_similarity(pt)
+
+sklearn=library used for pre processing or validation 
+cosine_similarity=graph between vectors 
+
+
+def recommend(book_name):
+    index = np.where(pt.index=='Zoya')[0][0]
+    Similar = sorted(list(enumerate(Score[0])),key=lambda x:x[1],reverse=True)[1:6]
+    
+    for i in Similar:
+            print(pt.index[i[0]])
+   
+
+ recommend function Give the suggestion of books. on which index the book is below sorted list is enumarete with score and then fetch similer index by above index command and it recommend books
+
+sorted(list(enumerate(Score[0])),key=lambda x:x[1],reverse=True)[1:6]
+
+lambda can take any number of argument
+
+recommend('1984')
+
+pt.index[271]
+
+recommend('A Bend in the Road')
+
+recommend('Zen and the Art of Motorcycle Maintenance: An Inquiry into Values')
+
